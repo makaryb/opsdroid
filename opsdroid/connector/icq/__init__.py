@@ -59,21 +59,34 @@ class ConnectorICQ(Connector):
         from. This method was created to keep if/else
         statements to a minium on _parse_message.
         :param response (str): Response returned by aiohttp.ClientSession.
+        :param bot_name (str): Name of the bot used in opsdroid configuration.
         """
-        user = None
+        chat_id = None
+        user_id = None
 
-        if "chatId" in response.get("payload", {}).get("chat", None):
-            user = response["payload"]["chat"]["chatId"]
+        chat_type = response.get("payload", {}).get("chat", {}).get("type", None)
 
-        return user
+        if "chatId" in response.get("payload", {}).get("chat", {}):
+            chat_id = response["payload"]["chat"]["chatId"]
+            if chat_type in ["group", "channel"]:
+                if "userId" in response.get("payload", {}).get("from", {}):
+                    user_id = response["payload"]["from"]["userId"]
+            else:
+                user_id = chat_id
 
-    def handle_user_permission(self, response, user):
+        return chat_id, user_id
+
+    def handle_user_permission(self, chat_id, user_id):
         """
         Handle user permissions.
         This will check if the user that tried to talk with
         the bot is allowed to do so.
         """
-        if not self.whitelisted_users or user in self.whitelisted_users:
+        if (
+            not self.whitelisted_users
+            or chat_id in self.whitelisted_users
+            or user_id in self.whitelisted_users
+        ):
             return True
 
         return False
@@ -129,15 +142,15 @@ class ConnectorICQ(Connector):
                     self.latest_update = event["eventId"]
                     _LOGGER.debug("editedMessage message - Ignoring message.")
                 elif event.get("type", None) == "newMessage" and "text" in payload:
-                    user = self.get_user(event)
+                    chat_id, user_id = self.get_user(event)
                     message = Message(
                         text=payload["text"],
-                        user=user,
-                        user_id=user,
-                        target=user,
+                        user=chat_id,
+                        user_id=chat_id,
+                        target=chat_id,
                         connector=self,
                     )
-                    if self.handle_user_permission(event, user):
+                    if self.handle_user_permission(chat_id, user_id):
                         await self.opsdroid.parse(message)
                     else:
                         message.text = (
