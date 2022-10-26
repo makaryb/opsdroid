@@ -10,9 +10,9 @@ from opsdroid.events import Message
 _LOGGER = logging.getLogger(__name__)
 CONFIG_SCHEMA = {
     Required("token"): str,
-    "update-interval": float,
-    "default-user": str,
+    "base-url": str,
     "whitelisted-users": list,
+    "update-interval": float,
 }
 
 
@@ -35,7 +35,7 @@ class ConnectorICQ(Connector):
         self.opsdroid = opsdroid
         self.latest_update = None
         self.listening = True
-        self.base_url = config.get("base-url", None)
+        self.base_url = config.get("base-url", "api.icq.net/bot/v1/")
         self.default_user = config.get("default-user", None)
         self.default_target = self.default_user
         self.whitelisted_users = config.get("whitelisted-users", None)
@@ -61,37 +61,32 @@ class ConnectorICQ(Connector):
         :param response (str): Response returned by aiohttp.ClientSession.
         :param bot_name (str): Name of the bot used in opsdroid configuration.
         """
-        chat_id = None
+        nick = None
         user_id = None
 
-        chat_type = response.get("payload", {}).get("chat", {}).get("type", None)
+        if "userId" in response.get("payload", {}).get("from", {}):
+            user_id = response["payload"]["from"]["userId"]
+        if "nick" in response.get("payload", {}).get("from", {}):
+            nick = response["payload"]["from"]["nick"]
 
-        if "chatId" in response.get("payload", {}).get("chat", {}):
-            chat_id = response["payload"]["chat"]["chatId"]
-            if chat_type in ["group", "channel"]:
-                if "userId" in response.get("payload", {}).get("from", {}):
-                    user_id = response["payload"]["from"]["userId"]
-            else:
-                user_id = chat_id
+        return nick, user_id
 
-        return chat_id, user_id
-
-    def handle_user_permission(self, chat_id, user_id):
+    def handle_user_permission(self, nick, user_id):
         """
         Handle user permissions.
         This will check if the user that tried to talk with
         the bot is allowed to do so.
         """
         if (
-            not self.whitelisted_users
-            or chat_id in self.whitelisted_users
-            or user_id in self.whitelisted_users
+            (not self.whitelisted_users)
+            or (nick in self.whitelisted_users)
+            or (user_id in self.whitelisted_users)
         ):
             return True
 
         return False
 
-    def build_url(self, method):
+    def build_url(self, method) -> str:
         """
         Build the url to connect to the API.
         :param method (str): API call end point.
@@ -134,37 +129,37 @@ class ConnectorICQ(Connector):
         """
 
         _LOGGER.debug(response)
-        try:
-            for event in response["events"]:
-                _LOGGER.debug(event)
-                payload = event.get("payload", {})
-                if event.get("type", None) == "editedMessage":
-                    self.latest_update = event["eventId"]
-                    _LOGGER.debug("editedMessage message - Ignoring message.")
-                elif event.get("type", None) == "newMessage" and "text" in payload:
-                    chat_id, user_id = self.get_user(event)
-                    message = Message(
-                        text=payload["text"],
-                        user=chat_id,
-                        user_id=chat_id,
-                        target=chat_id,
-                        connector=self,
-                    )
-                    if self.handle_user_permission(chat_id, user_id):
-                        await self.opsdroid.parse(message)
-                    else:
-                        message.text = (
-                            "Sorry, you're not allowed " "to speak with this bot."
-                        )
-                        await self.send(message)
-                    self.latest_update = event["eventId"]
-                elif "eventId" in event:
-                    self.latest_update = event["eventId"]
-                    _LOGGER.debug("Ignoring event.")
+        for event in response.get("events", {}):
+            _LOGGER.debug(event)
+            payload = event.get("payload", {})
+            if event.get("type", None) == "editedMessage":
+                self.latest_update = event.get("eventId", None)
+                _LOGGER.debug("editedMessage message - Ignoring message.")
+            elif event.get("type", None) == "newMessage" and "text" in payload:
+                nick, user_id = self.get_user(event)
+                message = Message(
+                    text=payload["text"],
+                    user=nick,
+                    user_id=user_id,
+                    target=payload["chat"]["chatId"],
+                    connector=self,
+                )
+                if self.handle_user_permission(nick, user_id):
+                    await self.opsdroid.parse(message)
                 else:
-                    _LOGGER.error("Unable to parse the event.")
-        except KeyError:
-            raise
+                    if "type" in payload.get("chat", {}):
+                        if "private" == payload["chat"]["type"]:
+                            message.text = (
+                                "Sorry, you're not allowed to speak with this bot."
+                            )
+                            _LOGGER.debug("I am inside not allowed to speak.")
+                            await self.send(message)
+                self.latest_update = event.get("eventId", None)
+            elif "eventId" in event:
+                self.latest_update = event.get("eventId", None)
+                _LOGGER.debug("Ignoring event.")
+            else:
+                _LOGGER.error("Unable to parse the event.")
 
     async def _get_messages(self):
         """
