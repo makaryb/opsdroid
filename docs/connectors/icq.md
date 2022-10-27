@@ -19,7 +19,7 @@ connectors:
     # required
     token: "001.3333333333.1111111111:1007654321"  # ICQ bot token
     # optional
-    base-url: "https://api.icq.net/bot/v1/"
+    base-url: "https://api.icq.net/bot/v1/"  # specify this if you use ICQ as corporate messanger for teamwork and have own url
     whitelisted-users:  # List of users who can speak to the bot, if not set anyone can speak
       - user1 # nick or userId
       - user2 # for example 'sam' or '766543245'
