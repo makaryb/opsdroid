@@ -209,6 +209,16 @@ connectors:
 #    # Optional
 #    bot-name: opsdroid
 #
+## ICQ (core)
+#  icq:
+#    # required
+#    token: "001.3333333333.1111111111:1007654321"  # ICQ bot token
+#    # optional
+#    base-url: "api.icq.net/bot/v1/"
+#    whitelisted-users:  # List of users who can speak to the bot, if not set anyone can speak
+#      - user1 # nick or userId
+#      - user2 # for example 'sam' or '766543245'
+#
 #  ## Telegram (core)
 #  telegram:
 #    # required

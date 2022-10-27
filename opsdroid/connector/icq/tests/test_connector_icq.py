@@ -6,6 +6,7 @@ import asynctest.mock as amock
 import pytest
 
 from opsdroid.connector.icq import ConnectorICQ
+from opsdroid.const import ICQ_BOT_API_ENDPOINT
 
 from opsdroid.events import Message
 
@@ -137,12 +138,13 @@ def test_handle_user_permission_not_empty_white_list(opsdroid):
 
 def test_build_url(opsdroid):
     config = connector_config
-    config["base-url"] = "api.icq.net/bot/v1/"
+    config["base-url"] = ICQ_BOT_API_ENDPOINT
     connector = ConnectorICQ(config, opsdroid=opsdroid)
 
-    url = connector.build_url("events/get")
+    method = "events/get"
+    url = connector.build_url(method)
 
-    assert url == "https://api.icq.net/bot/v1/events/get"
+    assert url == f"{ICQ_BOT_API_ENDPOINT}{method}"
 
 
 @pytest.mark.asyncio

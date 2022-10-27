@@ -6,9 +6,9 @@ A connector for [ICQ](https://icq.com/).
 
 - ICQ account - to create a bot
 - [Bot API Token](https://icq.com/botapi/?lang=en)
-- Api url: `api.icq.net/bot/v1/`
 
-_Note: To register a new bot, open ICQ, write **@metabot** and press `START` button.
+_Note: To register a new bot, open ICQ, write **@metabot** and press `START` button. 
+Then in `metabot` help menu select `Create a new bot`.
 Provide username (ending in bot) and metabot will give you your Bot API Token._
 
 ## Configuration
@@ -19,7 +19,7 @@ connectors:
     # required
     token: "001.3333333333.1111111111:1007654321"  # ICQ bot token
     # optional
-    base-url: "api.icq.net/bot/v1/"
+    base-url: "https://api.icq.net/bot/v1/"
     whitelisted-users:  # List of users who can speak to the bot, if not set anyone can speak
       - user1 # nick or userId
       - user2 # for example 'sam' or '766543245'
@@ -27,13 +27,13 @@ connectors:
 
 ## Usage
 
-You can add this connector to:
+You can add your bot and this connector to:
 
 - Direct Messages
 - Groups
 - Channels
 
-If you want opsdroid to work on your group or channel, you should allow bot to join chats. You can fo it with metabot. Then you should add it by opening your channel/group details and select the _Add Members_ button, then search for your bot username and add it. It's a good idea to add the bot as admin, because in some cases where you have privacy active, opsdroid won't be able to read user's names.
+If you want opsdroid to work on your group or channel, you should allow bot to join chats. You can do it with metabot: in `metabot` help menu select `(Dis)Allow bot to join chats`. Then you should add it by opening your channel/group details and select the _Add Members_ button, then search for your bot username and add it. It's a good idea to add the bot as admin or at least allow bot to write. You can do it in your channel/group details in `Subscribers`/`Members`.
 
 ## Whitelisting users
 

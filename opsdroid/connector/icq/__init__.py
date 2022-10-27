@@ -5,6 +5,7 @@ import asyncio
 from voluptuous import Required
 
 from opsdroid.connector import Connector, register_event
+from opsdroid.const import ICQ_BOT_API_ENDPOINT
 from opsdroid.events import Message
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class ConnectorICQ(Connector):
         self.opsdroid = opsdroid
         self.latest_update = None
         self.listening = True
-        self.base_url = config.get("base-url", "api.icq.net/bot/v1/")
+        self.base_url = config.get("base-url", ICQ_BOT_API_ENDPOINT)
         self.default_user = config.get("default-user", None)
         self.default_target = self.default_user
         self.whitelisted_users = config.get("whitelisted-users", None)
@@ -92,7 +93,7 @@ class ConnectorICQ(Connector):
         :param method (str): API call end point.
         :return: String that represents the full API url.
         """
-        return f"https://{self.base_url}{method}"
+        return f"{self.base_url}{method}"
 
     async def connect(self):
         """

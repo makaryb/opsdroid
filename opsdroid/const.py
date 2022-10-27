@@ -54,6 +54,7 @@ TWITCH_API_ENDPOINT = "https://api.twitch.tv/helix"
 TWITCH_IRC_MESSAGE_REGEX = r"@.*;id=(?P<message_id>.*);m.*user-id=(?P<user_id>.*);user-type=.*:(?P<user>.*?)!.*PRIVMSG[^:]*:(?P<message>.*)"
 TWITCH_JSON = os.path.join(DEFAULT_ROOT_PATH, "twitch.json")
 GITLAB_API_ENDPOINT = "https://gitlab.com/api/v4"
+ICQ_BOT_API_ENDPOINT = "https://api.icq.net/bot/v1/"
 EXCLUDED_CONFIG_KEYS = [
     "loader",
     "submodule_search_locations",
