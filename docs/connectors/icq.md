@@ -33,7 +33,7 @@ You can add your bot and this connector to:
 - Groups
 - Channels
 
-If you want opsdroid to work on your group or channel, you should allow bot to join chats. You can do it with metabot: in `metabot` help menu select `(Dis)Allow bot to join chats`. Then you should add it by opening your channel/group details and select the _Add Members_ button, then search for your bot username and add it. It's a good idea to add the bot as admin or at least allow bot to write. You can do it in your channel/group details in `Subscribers`/`Members`.
+If you want opsdroid to work on your group or channel, you should allow bot to join chats. You can do it with metabot: in `metabot` help menu select `(Dis)Allow bot to join chats`. Then you would be able to add it by opening your channel/group details and select the _Add Members_ button, then search for your bot username and add it. It's a good idea to add the bot as admin or at least allow bot to write. You can do it in your channel/group details in `Subscribers`/`Members`.
 
 ## Whitelisting users
 
@@ -50,8 +50,8 @@ Here is how you can whitelist a user:
       - 766543245 # this is a userId
 ```
 
-Finding your `userId` is not straight forward. This value is sent by ICQ when a user sends a private message to someone (the bot in this case) or when someone calls the `events/get` from the API.
-To find a `userId` by a private message, set the `logging` level to `debug` and start a new private message to the bot. You will see the API response on your console - it will look similar to this:
+Finding your `userId` is not straight forward. This value is presented in data for event on new message sent by someone to bot. To receive server events use `/events/get` method.
+To find a `userId` by a private message, set the `logging` level to `debug` and send a new private message to the bot. You will see the API response on your console - it will look similar to this:
 
 ```json
 {
